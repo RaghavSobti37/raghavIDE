@@ -1,0 +1,17 @@
+{
+  "name": "agent-workstation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.1",
+    "hono": "^4.7.8",
+    "node-pty": "^1.0.0",
+    "ws": "^8.18.1"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "enabled": ["render", "vercel", "open-design"],
+  "mcpServers": {
+    "render": {
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:RENDER_API_KEY}"
+      }
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    },
+    "open-design": {
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\ragha\\OneDrive\\Desktop\\open-design\\apps\\daemon\\dist\\cli.js",
+        "mcp",
+        "--daemon-url",
+        "http://127.0.0.1:7456"
+      ],
+      "env": {
+        "OD_DATA_DIR": "C:\\Users\\ragha\\OneDrive\\Desktop\\open-design\\.od"
+      }
+    }
+  }
+}

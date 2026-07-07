@@ -1,0 +1,23 @@
+{
+  "name": "raghavide",
+  "version": "1.0.0",
+  "description": "Global Agent Hub — 9Router + Hermes + MCP + Workstation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "9router:install": "node scripts/9router/install-desktop.mjs",
+    "9router:combos": "node scripts/9router/configure-combos.mjs",
+    "9router:setup": "node scripts/9router/setup.mjs",
+    "9router:verify": "node scripts/9router/verify.mjs",
+    "mcp:discover": "node scripts/discover-mcp-plugins.mjs --write",
+    "mcp:sync": "node scripts/sync-mcp-config.mjs",
+    "mcp:verify": "node scripts/verify-mcp.mjs",
+    "hermes:install": "node scripts/install-hermes.mjs",
+    "hermes:soul": "node scripts/inject-hermes-soul.mjs",
+    "memory:sync": "node scripts/sync-hermes-to-obsidian.mjs",
+    "workstation": "cd tools/agent-workstation && npm start",
+    "workstation:smoke": "cd tools/agent-workstation && npm run smoke",
+    "hub:all": "npm run 9router:install && npm run 9router:combos && npm run 9router:setup && npm run mcp:sync && npm run memory:sync",
+    "hub:verify": "npm run 9router:verify && npm run mcp:verify && npm run workstation:smoke"
+  }
+}

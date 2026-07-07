@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "servers": {
+    "render": {
+      "id": "render",
+      "name": "Render",
+      "authType": "bearer",
+      "envVars": ["RENDER_API_KEY"],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\render\\**\\mcp.json",
+      "docsUrl": "https://render.com/docs/mcp"
+    },
+    "vercel": {
+      "id": "vercel",
+      "name": "Vercel",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\vercel\\**\\mcp.json",
+      "docsUrl": "https://vercel.com/docs/agent-resources/vercel-mcp"
+    },
+    "supabase": {
+      "id": "supabase",
+      "name": "Supabase",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\supabase\\**\\mcp.json",
+      "docsUrl": "https://supabase.com/docs/guides/getting-started/mcp"
+    },
+    "prisma": {
+      "id": "prisma",
+      "name": "Prisma",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\prisma\\**\\mcp.json",
+      "docsUrl": "https://www.prisma.io/docs/postgres/integrations/mcp-server",
+      "notes": "Plugin ships Prisma-Local (stdio via npx) and Prisma-Remote (https://mcp.prisma.io/mcp OAuth)."
+    },
+    "sentry": {
+      "id": "sentry",
+      "name": "Sentry",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\sentry\\**\\mcp.json",
+      "docsUrl": "https://docs.sentry.io/product/sentry-mcp/"
+    },
+    "bright-data": {
+      "id": "bright-data",
+      "name": "Bright Data",
+      "authType": "bearer",
+      "envVars": [
+        "BRIGHT_DATA_API_TOKEN",
+        "BRIGHT_DATA_UNLOCKER_ZONE",
+        "BRIGHT_DATA_BROWSER_ZONE"
+      ],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\bright-data\\**\\mcp.json",
+      "docsUrl": "https://docs.brightdata.com/ai/mcp-server/overview"
+    },
+    "neon-postgres": {
+      "id": "neon-postgres",
+      "name": "Neon Postgres",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\neon-postgres\\**\\mcp.json",
+      "docsUrl": "https://neon.com/docs/ai/neon-mcp-server"
+    },
+    "mongodb": {
+      "id": "mongodb",
+      "name": "MongoDB",
+      "authType": "stdio",
+      "envVars": ["MDB_MCP_CONNECTION_STRING"],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\mongodb\\**\\mcp.json",
+      "docsUrl": "https://www.mongodb.com/docs/mcp-server/"
+    },
+    "open-design": {
+      "id": "open-design",
+      "name": "Open Design",
+      "authType": "stdio",
+      "envVars": ["OD_DATA_DIR"],
+      "cursorPluginPath": null,
+      "docsUrl": "https://github.com/open-design/open-design"
+    },
+    "browserstack": {
+      "id": "browserstack",
+      "name": "BrowserStack",
+      "authType": "bearer",
+      "envVars": ["BROWSERSTACK_USERNAME", "BROWSERSTACK_ACCESS_KEY"],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\browserstack\\**\\mcp.json",
+      "docsUrl": "https://www.browserstack.com/docs/mcp-server"
+    },
+    "posthog": {
+      "id": "posthog",
+      "name": "PostHog",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\posthog\\**\\mcp.json",
+      "docsUrl": "https://posthog.com/docs/model-context-protocol"
+    },
+    "clerk": {
+      "id": "clerk",
+      "name": "Clerk",
+      "authType": "oauth",
+      "envVars": [],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\clerk\\**\\mcp.json",
+      "docsUrl": "https://clerk.com/docs/mcp/overview"
+    },
+    "resend": {
+      "id": "resend",
+      "name": "Resend",
+      "authType": "bearer",
+      "envVars": ["RESEND_API_KEY"],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\resend\\**\\mcp.json",
+      "docsUrl": "https://resend.com/docs/mcp"
+    },
+    "browse": {
+      "id": "browse",
+      "name": "Browse",
+      "authType": "stdio",
+      "envVars": ["CURSOR_PLUGIN_ROOT"],
+      "cursorPluginPath": "%USERPROFILE%\\.cursor\\plugins\\cache\\cursor-public\\browse\\**\\mcp.json",
+      "docsUrl": "https://cursor.com/docs/context/mcp"
+    }
+  }
+}

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Workstation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --ok: #3fb950;
+      --bad: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+    header .path { color: var(--muted); font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    button, select, textarea {
+      font: inherit;
+      color: var(--text);
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+    }
+    button { cursor: pointer; }
+    button:hover { border-color: var(--accent); }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr 280px;
+      grid-template-rows: 1fr 220px;
+      min-height: 0;
+    }
+    .panel {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel.right { border-right: none; grid-row: 1 / span 2; }
+    .panel.bottom {
+      grid-column: 1 / span 2;
+      border-right: none;
+    }
+    .panel h2 {
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    #fileTree {
+      overflow: auto;
+      padding: 6px;
+      font-size: 13px;
+      flex: 1;
+    }
+    #fileTree .item {
+      padding: 3px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #fileTree .item:hover { background: #21262d; }
+    #fileTree .item.active { background: #1f6feb33; color: var(--accent); }
+    #fileTree .dir::before { content: "📁 "; }
+    #fileTree .file::before { content: "📄 "; }
+    #editor {
+      flex: 1;
+      resize: none;
+      border: none;
+      padding: 12px;
+      background: #0d1117;
+      color: var(--text);
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      outline: none;
+      min-height: 0;
+    }
+    .editor-bar {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    #currentFile { flex: 1; font-size: 12px; color: var(--muted); }
+    #terminal { flex: 1; padding: 4px; min-height: 0; }
+    .connections, .agent-box {
+      padding: 10px;
+      overflow: auto;
+      font-size: 13px;
+    }
+    .status-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0d1117;
+    }
+    .status-card h3 { margin: 0 0 6px; font-size: 13px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge.ok { background: #23863633; color: var(--ok); }
+    .badge.bad { background: #da363333; color: var(--bad); }
+    .badge.warn { background: #9e6a0333; color: #d29922; }
+    #skillsSelect {
+      width: 100%;
+      min-height: 120px;
+      margin: 8px 0;
+    }
+    #promptBox {
+      width: 100%;
+      min-height: 80px;
+      margin-bottom: 8px;
+    }
+    #agentOutput {
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+      max-height: 180px;
+      overflow: auto;
+      margin-top: 8px;
+    }
+    .muted { color: var(--muted); font-size: 12px; }
+    ul.mcp-list { margin: 6px 0 0; padding-left: 18px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Agent Workstation</h1>
+    <button id="openFolderBtn">Open Folder</button>
+    <span class="path" id="workspacePath">No folder selected</span>
+    <button id="refreshBtn">Refresh</button>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Files</h2>
+      <div id="fileTree"><p class="muted" style="padding:8px">Open a folder to browse.</p></div>
+    </section>
+
+    <section class="panel" style="border-right:1px solid var(--border)">
+      <div class="editor-bar">
+        <span id="currentFile">No file open</span>
+        <button id="saveBtn" disabled>Save</button>
+      </div>
+      <textarea id="editor" placeholder="Open a file to edit..." disabled></textarea>
+    </section>
+
+    <section class="panel right">
+      <h2>Connections</h2>
+      <div class="connections">
+        <div class="status-card" id="mcpCard">
+          <h3>MCP</h3>
+          <span class="badge warn" id="mcpBadge">checking</span>
+          <div id="mcpDetail" class="muted">...</div>
+        </div>
+        <div class="status-card" id="routerCard">
+          <h3>9Router</h3>
+          <span class="badge warn" id="routerBadge">checking</span>
+          <div id="routerDetail" class="muted">...</div>
+        </div>
+      </div>
+
+      <h2>Agent</h2>
+      <div class="agent-box">
+        <label class="muted">Skills (Ctrl/Cmd+click multi-select)</label>
+        <select id="skillsSelect" multiple></select>
+        <label class="muted">Prompt</label>
+        <textarea id="promptBox" placeholder="Describe what the agent should do..."></textarea>
+        <button id="runAgentBtn">Run Agent</button>
+        <div id="agentOutput"></div>
+      </div>
+    </section>
+
+    <section class="panel bottom">
+      <h2>Terminal</h2>
+      <div id="terminal"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+  <script>
+    const state = {
+      root: null,
+      currentFile: null,
+      treeCache: new Map(),
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    async function api(path, opts = {}) {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+        ...opts,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      return data;
+    }
+
+    async function openFolder() {
+      const data = await api('/api/open-folder', {
+        method: 'POST',
+        body: JSON.stringify({ initial: state.root || '' }),
+      });
+      state.root = data.path;
+      $('workspacePath').textContent = data.path;
+      state.currentFile = null;
+      $('currentFile').textContent = 'No file open';
+      $('editor').value = '';
+      $('editor').disabled = true;
+      $('saveBtn').disabled = true;
+      await loadTree('.');
+      connectTerminal();
+      await refreshGitHint();
+    }
+
+    async function loadTree(rel) {
+      if (!state.root) return;
+      const data = await api(`/api/files?root=${encodeURIComponent(state.root)}&path=${encodeURIComponent(rel)}`);
+      state.treeCache.set(rel, data.entries);
+      renderTree();
+    }
+
+    function renderTree() {
+      const el = $('fileTree');
+      el.innerHTML = '';
+      const entries = state.treeCache.get('.') || [];
+      for (const item of entries) {
+        const div = document.createElement('div');
+        div.className = `item ${item.type}${state.currentFile === item.path ? ' active' : ''}`;
+        div.textContent = item.name;
+        div.title = item.path;
+        div.onclick = () => {
+          if (item.type === 'dir') loadTree(item.path);
+          else openFile(item.path);
+        };
+        el.appendChild(div);
+      }
+      if (!entries.length) el.innerHTML = '<p class="muted" style="padding:8px">Empty folder.</p>';
+    }
+
+    async function openFile(rel) {
+      const data = await api(
+        `/api/file?root=${encodeURIComponent(state.root)}&path=${encodeURIComponent(rel)}`,
+      );
+      state.currentFile = rel;
+      $('currentFile').textContent = rel;
+      $('editor').value = data.content;
+      $('editor').disabled = false;
+      $('saveBtn').disabled = false;
+      renderTree();
+    }
+
+    async function saveFile() {
+      if (!state.root || !state.currentFile) return;
+      await api('/api/file', {
+        method: 'PUT',
+        body: JSON.stringify({
+          root: state.root,
+          path: state.currentFile,
+          content: $('editor').value,
+        }),
+      });
+      $('currentFile').textContent = `${state.currentFile} (saved)`;
+    }
+
+    async function refreshGitHint() {
+      if (!state.root) return;
+      try {
+        const git = await api(`/api/git/status?path=${encodeURIComponent(state.root)}`);
+        if (git.ok) {
+          $('workspacePath').textContent = `${state.root}  [${git.branch}]`;
+        }
+      } catch {
+        // not a git repo
+      }
+    }
+
+    async function refreshConnections() {
+      try {
+        const mcp = await api('/api/mcp/status');
+        const ok = mcp.ok !== false;
+        $('mcpBadge').className = `badge ${ok ? 'ok' : 'bad'}`;
+        $('mcpBadge').textContent = ok ? 'ok' : 'issue';
+        const servers = mcp.servers || [];
+        const list = Array.isArray(servers)
+          ? servers.map((s) => `<li>${typeof s === 'string' ? s : `${s.id}: ${s.status || '?'}`}</li>`).join('')
+          : '';
+        $('mcpDetail').innerHTML = `<div class="muted">source: ${mcp.source || '?'}</div><ul class="mcp-list">${list}</ul>`;
+      } catch (err) {
+        $('mcpBadge').className = 'badge bad';
+        $('mcpBadge').textContent = 'error';
+        $('mcpDetail').textContent = err.message;
+      }
+
+      try {
+        const router = await api('/api/9router/status');
+        $('routerBadge').className = `badge ${router.ok ? 'ok' : 'bad'}`;
+        $('routerBadge').textContent = router.ok ? 'online' : 'offline';
+        $('routerDetail').innerHTML = router.ok
+          ? `<div>${router.url}</div><div class="muted">model: ${router.model} · ${router.modelCount} models</div>`
+          : `<div class="muted">${router.error || 'unreachable'}</div>`;
+      } catch (err) {
+        $('routerBadge').className = 'badge bad';
+        $('routerBadge').textContent = 'error';
+        $('routerDetail').textContent = err.message;
+      }
+    }
+
+    async function loadSkills() {
+      const manifest = await api('/api/skills');
+      const select = $('skillsSelect');
+      select.innerHTML = '';
+      for (const skill of manifest.skills || []) {
+        const opt = document.createElement('option');
+        opt.value = skill;
+        opt.textContent = skill;
+        select.appendChild(opt);
+      }
+    }
+
+    async function runAgent() {
+      const prompt = $('promptBox').value.trim();
+      if (!prompt) return;
+      $('agentOutput').textContent = 'Running...';
+      const skills = [...$('skillsSelect').selectedOptions].map((o) => o.value);
+      const data = await api('/api/agent/run', {
+        method: 'POST',
+        body: JSON.stringify({ prompt, cwd: state.root, skills }),
+      });
+      $('agentOutput').textContent = [
+        `mode: ${data.mode}`,
+        data.note || '',
+        data.stdout || '',
+        data.stderr || '',
+        data.error || '',
+      ].filter(Boolean).join('\n');
+    }
+
+    let termSocket = null;
+    let term = null;
+    let fitAddon = null;
+
+    function connectTerminal() {
+      if (termSocket) {
+        termSocket.close();
+        termSocket = null;
+      }
+      if (!term) {
+        term = new Terminal({ cursorBlink: true, fontSize: 13, theme: { background: '#0d1117' } });
+        fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open($('terminal'));
+      }
+      const cwd = state.root ? encodeURIComponent(state.root) : '';
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      termSocket = new WebSocket(`${proto}://${location.host}/api/terminal?cwd=${cwd}`);
+      termSocket.onopen = () => {
+        fitAddon.fit();
+        termSocket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+      };
+      termSocket.onmessage = (ev) => term.write(ev.data);
+      term.onData((data) => {
+        if (termSocket?.readyState === WebSocket.OPEN) termSocket.send(data);
+      });
+      window.addEventListener('resize', () => {
+        if (!term || !fitAddon || !termSocket) return;
+        fitAddon.fit();
+        termSocket.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+      });
+    }
+
+    $('openFolderBtn').onclick = () => openFolder().catch(alert);
+    $('saveBtn').onclick = () => saveFile().catch(alert);
+    $('runAgentBtn').onclick = () => runAgent().catch(alert);
+    $('refreshBtn').onclick = () => {
+      refreshConnections();
+      if (state.root) {
+        loadTree('.');
+        refreshGitHint();
+      }
+    };
+
+    loadSkills().catch(console.error);
+    refreshConnections();
+    connectTerminal();
+    setInterval(refreshConnections, 30000);
+  </script>
+</body>
+</html>

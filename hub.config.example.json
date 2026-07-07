@@ -1,0 +1,11 @@
+{
+  "tscPlatformRoot": "C:\\Users\\ragha\\OneDrive\\Desktop\\TSC Platform",
+  "skillsRoot": "%tscPlatformRoot%\\.agents\\skills",
+  "rulesRoot": "%tscPlatformRoot%\\.cursor\\rules",
+  "hermesHome": "%LOCALAPPDATA%\\hermes",
+  "nineRouterEnv": "%USERPROFILE%\\.9router\\ide-hub.env",
+  "obsidianVault": "%USERPROFILE%\\.tsc-hub\\memory\\obsidian",
+  "mcpCanonical": "%USERPROFILE%\\.tsc-hub\\config\\mcp.servers.json",
+  "defaultModel": "combo/tsc-unlimited",
+  "workstationPort": 3028
+}
